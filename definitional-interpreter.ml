@@ -21,5 +21,27 @@ type exp =
          | Proj of int * exp
 ;;
 
-type answer = IntConst of int | BoolConst of int | Tup of int * exp list ;;
+(* type answer = IntConst of int | BoolConst of int | Tup of int * exp list ;; *)
 
+let rec eval rho exp = match exp with
+                          IntConst n  -> n
+                        | Abs e -> abs (eval rho e)
+                        | Identifier s -> eval rho (rho s)
+                        | Add (e1, e2) -> (eval rho e1) + (eval rho e2)
+                        | Sub (e1, e2) -> (eval rho e1) + (eval rho e2)
+                        | Mul (e1, e2) -> (eval rho e1) * (eval rho e2)
+                        | Div (e1, e2) -> (eval rho e1) / (eval rho e2)
+                        | Exp (e1, e2) -> int_of_float (float_of_int (eval rho e1) ** float_of_int (eval rho e2))
+                        | BoolConst b -> b
+                        | Not b -> not b
+                        | And (e1, e2) -> (eval rho e1) && (eval rho e2)
+                        | Or (e1, e2) -> (eval rho e1) && (eval rho e2)
+                        | Implies (e1, e2) -> (not (eval rho e1)) || (eval rho e2)
+                        | Eql (e1, e2) -> (eval rho e1) = (eval rho r2)
+                        | Grt (e1, e2) -> (eval rho e1) > (eval rho e2)
+                        | Gre (e1, e2) -> (eval rho e1) >= (eval rho e2)
+                        | Lst (e1, e2) -> (eval rho e1) < (eval rho e2)
+                        | Lse (e1, e2) -> (eval rho e1) <= (eval rho e2)
+                        | Tup (n, l) -> l
+                        | Proj (n, e) -> List.nth l n
+;;
