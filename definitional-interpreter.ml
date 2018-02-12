@@ -43,7 +43,7 @@ let rec listof l = match b with
 let rec eval rho exp = match exp with
                         | IntConst n  -> IntAns n
                         | Abs e -> IntAns (abs (intof (eval rho e)))
-                        | Identifier s -> eval rho (rho s)
+                        | Identifier s -> (rho s)
                         | Add (e1, e2) -> IntAns ((intof (eval rho e1)) + (intof (eval rho e2)))
                         | Sub (e1, e2) -> IntAns ((intof (eval rho e1)) - (intof (eval rho e2)))
                         | Mul (e1, e2) -> IntAns ((intof (eval rho e1)) * (intof (eval rho e2)))
@@ -65,5 +65,5 @@ let rec eval rho exp = match exp with
 
 type opcode = INTCONST of int | ABS | ADD | SUB | MUL | DIV | EXP 
             | BOOLCONST of bool | NOT | AND | OR | IMPLIES | GRT | LS | GRTEQL | LSEQL 
-            | EQL | TUPLE | PROJ
+            | EQL | TUPLE | PROJ | IDENTIFIER of string | LOOKUP
 ;;
