@@ -17,14 +17,14 @@ type exp =
          | Ls of exp * exp
          | GrtEql of exp * exp
          | LsEql of exp * exp
-         | Tuple of int * exp list
+         | Tuple of int * (exp list)
          | Proj of int * exp
 ;;
 
 type answer = 
         | IntAns of int
         | BoolAns of bool
-        | TupleAns of int * answer list
+        | TupleAns of int * (answer list)
 ;;
 
 let rec map f l = match l with
@@ -56,7 +56,7 @@ let rec eval rho exp = match exp with
                         | GrtEql (e1, e2) -> BoolAns ((intof (eval rho e1)) >= (intof (eval rho e2)))
                         | LsEql (e1, e2) -> BoolAns ((intof (eval rho e1)) <= (intof (eval rho e2)))
                         | Tuple (n, l) -> TupleAns (n, map (eval rho) l)
-                        | Proj (i, Tuple (n, l)) -> eval rho (List.nth l n)
+                        | Proj (i, Tuple (n, l)) -> eval rho (List.nth l i)
 ;;
 
 type opcode = INTCONST of int | ABS | ADD | SUB | MUL | DIV | EXP 
@@ -64,7 +64,7 @@ type opcode = INTCONST of int | ABS | ADD | SUB | MUL | DIV | EXP
             | EQL | TUPLE | PROJ | LOOKUP of string | SEP
 ;;
 
-let join l sep = match l with
+let rec join l sep = match l with
                     | [] -> []
                     | x::xs -> x @ [sep] @ (join xs sep)
 ;; 
@@ -104,20 +104,20 @@ let rec execute (s, t, c) = match (s, c) with
                         | (n1::n2::s', ADD::c') -> execute((IntAns ((intof n1) + (intof n2)))::s', t, c')
                         | (n1::n2::s', SUB::c') -> execute((IntAns ((intof n1) - (intof n2)))::s', t, c')
                         | (n1::n2::s', MUL::c') -> execute((IntAns ((intof n1) * (intof n2)))::s', t, c')
-                        | (n1::n2::s', DIV::c') -> execute((IntAns ((intof n1) / (intof n2)))::s', t, c')
-                        | (n1::n2::s', EXP::c') -> execute((IntAns (intexp (intof n1) (intof n2)))::s', t, c')
+                        | (n1::n2::s', DIV::c') -> execute((IntAns ((intof n2) / (intof n1)))::s', t, c')
+                        | (n1::n2::s', EXP::c') -> execute((IntAns (intexp (intof n2) (intof n1)))::s', t, c')
                         | (s, (BOOLCONST b)::c') -> execute((BoolAns b)::s, t, c')
                         | (b::s', NOT::c') -> execute((BoolAns (not (boolof b)))::s', t, c')
                         | (b1::b2::s', AND::c') -> execute((BoolAns ((boolof b1) && (boolof b2)))::s', t, c')
                         | (b1::b2::s', OR::c') -> execute((BoolAns ((boolof b1) || (boolof b2)))::s', t, c')
-                        | (b1::b2::s', IMPLIES::c') -> execute((BoolAns ((not (boolof b1)) || (boolof b2)))::s', t, c')
-                        | (n1::n2::s', GRT::c') -> execute((BoolAns ((intof n1) > (intof n2)))::s', t, c')
-                        | (n1::n2::s', LS::c') -> execute((BoolAns ((intof n1) < (intof n2)))::s', t, c')
-                        | (n1::n2::s', GRTEQL::c') -> execute((BoolAns ((intof n1) >= (intof n2)))::s', t, c')
-                        | (n1::n2::s', LSEQL::c') -> execute((BoolAns ((intof n1) <= (intof n2)))::s', t, c')
+                        | (b1::b2::s', IMPLIES::c') -> execute((BoolAns ((not (boolof b2)) || (boolof b1)))::s', t, c')
+                        | (n1::n2::s', GRT::c') -> execute((BoolAns ((intof n2) > (intof n1)))::s', t, c')
+                        | (n1::n2::s', LS::c') -> execute((BoolAns ((intof n2) < (intof n1)))::s', t, c')
+                        | (n1::n2::s', GRTEQL::c') -> execute((BoolAns ((intof n2) >= (intof n1)))::s', t, c')
+                        | (n1::n2::s', LSEQL::c') -> execute((BoolAns ((intof n2) <= (intof n1)))::s', t, c')
                         | (e1::e2::s', EQL::c') -> execute((BoolAns (e1 = e2))::s', t, c')
                         | (s, (LOOKUP s1)::c') -> execute((t s1)::s, t, c')
                         | (s, SEP::c') -> execute(s, t, c')
-                        | (s, (INTCONST n)::TUPLE::c') -> execute((match (split n s) with (a, b) -> TupleAns(n, a)::b), t, c')
-                        | (e::i::s', PROJ::c') -> execute((match e with TupleAns(n, l) -> (List.nth l (intof i)))::s', t, c')
+                        | ((IntAns n)::s, TUPLE::c') -> execute((match (split n s) with (a, b) -> TupleAns(n, (List.rev a))::b), t, c')
+                        | (i::e::s', PROJ::c') -> execute((match e with TupleAns(n, l) -> (List.nth l (intof i)))::s', t, c')
 ;;
