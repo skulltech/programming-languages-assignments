@@ -65,5 +65,33 @@ let rec eval rho exp = match exp with
 
 type opcode = INTCONST of int | ABS | ADD | SUB | MUL | DIV | EXP 
             | BOOLCONST of bool | NOT | AND | OR | IMPLIES | GRT | LS | GRTEQL | LSEQL 
-            | EQL | TUPLE | PROJ | IDENTIFIER of string | LOOKUP
+            | EQL | TUPLE | PROJ | LOOKUP of string | SEP
+;;
+
+let join l sep = match l with
+                    | [] -> []
+                    | x::xs -> x @ [sep] @ (join xs sep)
+;; 
+
+let rec compile exp = match exp with
+                        | IntConst n  -> [INTCONST n]
+                        | Abs e -> (compile e) @ [ABS]
+                        | Identifier s -> [LOOKUP s]
+                        | Add (e1, e2) -> (compile e1) @ (compile e2) @ [ADD]
+                        | Sub (e1, e2) -> (compile e1) @ (compile e2) @ [SUB]
+                        | Mul (e1, e2) -> (compile e1) @ (compile e2) @ [MUL]
+                        | Div (e1, e2) -> (compile e1) @ (compile e2) @ [DIV]
+                        | Exp (e1, e2) -> (compile e1) @ (compile e2) @ [EXP]
+                        | BoolConst b -> [BOOLCONST b]
+                        | Not b -> (compile b) @ [NOT]
+                        | And (e1, e2) -> (compile e1) @ (compile e2) @ [AND]
+                        | Or (e1, e2) -> (compile e1) @ (compile e2) @ [OR]
+                        | Implies (e1, e2) -> (compile e1) @ (compile e2) @ [IMPLIES]
+                        | Eql (e1, e2) -> (compile e1) @ (compile e2) @ [EQL]
+                        | Grt (e1, e2) -> (compile e1) @ (compile e2) @ [GRT]
+                        | Ls (e1, e2) -> (compile e1) @ (compile e2) @ [LS]
+                        | GrtEql (e1, e2) -> (compile e1) @ (compile e2) @ [GRTEQL]
+                        | LsEql (e1, e2) -> (compile e1) @ (compile e2) @ [LSEQL]
+                        | Tuple (n, l) -> (join (map compile l) SEP) @ [INTCONST n] @ [TUPLE]
+                        | Proj (i, t) -> (compile t) @ [(INTCONST i); PROJ]
 ;;
