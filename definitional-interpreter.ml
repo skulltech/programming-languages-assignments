@@ -1,3 +1,4 @@
+(* 
 type exp = 
            IntConst of int
          | Abs of exp
@@ -20,8 +21,44 @@ type exp =
          | Tup of int * exp list
          | Proj of int * exp
 ;;
+*)
 
-(* type answer = IntConst of int | BoolConst of int | Tup of int * exp list ;; *)
+type exp = 
+          IntExp of intexp
+        | BoolExp of boolexp 
+        | Tuple of int * exp list
+        | Identifier of string
+        | Proj of int * exp
+        | Eql of exp * exp
+;;
+
+type intexp = 
+           IntConst of int
+         | Abs of intexp
+         | Add of intexp * intexp
+         | Sub of intexp * intexp
+         | Mul of intexp * intexp
+         | Div of intexp * intexp
+         | Exp of intexp * intexp
+         | Grt of intexp * intexp
+         | Lst of intexp * intexp
+         | Gre of intexp * intexp
+         | Lse of intexp * intexp
+;;
+
+type boolexp = 
+         | BoolConst of bool
+         | Not of boolexp
+         | And of boolexp * boolexp
+         | Or of boolexp * boolexp
+         | Implies of boolexp * boolexp
+;;
+
+type answer = 
+          IntConst of int
+        | BoolConst of bool
+        | Tuple of int * answer list
+;;
 
 let rec eval rho exp = match exp with
                           IntConst n  -> n
