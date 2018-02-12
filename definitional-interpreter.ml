@@ -1,6 +1,7 @@
-type exp = IntConst of int
+type exp = 
+           IntConst of int
          | Abs of exp
-         | Idn of string
+         | Identifier of string
          | Add of exp * exp
          | Sub of exp * exp
          | Mul of exp * exp
@@ -10,7 +11,7 @@ type exp = IntConst of int
          | Not of exp
          | And of exp * exp
          | Or of exp * exp
-         | Imp of exp * exp
+         | Implies of exp * exp
          | Eql of exp * exp
          | Grt of exp * exp
          | Lst of exp * exp
@@ -19,3 +20,6 @@ type exp = IntConst of int
          | Tup of int * exp list
          | Proj of int * exp
 ;;
+
+type answer = IntConst of int | BoolConst of int | Tup of int * exp list ;;
+
