@@ -62,3 +62,8 @@ let rec eval rho exp = match exp with
                         | Tuple (n, l) -> TupleAns (n, map (eval rho) l)
                         | Proj (i, Tuple (n, l)) -> eval rho (List.nth l n)
 ;;
+
+type opcode = INTCONST of int | ABS | ADD | SUB | MUL | DIV | EXP 
+            | BOOLCONST of bool | NOT | AND | OR | IMPLIES | GRT | LS | GRTEQL | LSEQL 
+            | EQL | TUPLE | PROJ
+;;
