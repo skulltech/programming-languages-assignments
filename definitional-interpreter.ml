@@ -91,7 +91,12 @@ let rec compile exp = match exp with
                         | Tuple (n, l) -> (join (map compile l) SEP) @ [INTCONST n] @ [TUPLE]
                         | Proj (i, t) -> (compile t) @ [(INTCONST i); PROJ]
 ;;
- 
+
+let rec split k xs = match xs with
+                        | [] -> ([], []) 
+                        | x::xs -> if k=1 then ([x], xs) else (match split (k-1) xs with (a, b) -> (x::a, b))
+;;
+
 let rec execute (s, t, c) = match (s, c) with
                         | (s, []) -> List.hd s
                         | (s, (INTCONST n)::c') -> execute((IntAns n)::s, t, c')
@@ -112,4 +117,7 @@ let rec execute (s, t, c) = match (s, c) with
                         | (n1::n2::s', LSEQL::c') -> execute((BoolAns ((intof n1) <= (intof n2)))::s', t, c')
                         | (e1::e2::s', EQL::c') -> execute((BoolAns (e1 = e2))::s', t, c')
                         | (s, (LOOKUP s1)::c') -> execute((t s1)::s, t, c')
+                        | (s, SEP::c') -> execute(s, t, c')
+                        | (s, (INTCONST n)::TUPLE::c') -> execute((match (split n s) with (a, b) -> TupleAns(n, a)::b), t, c')
+                        | (e::i::s', PROJ::c') -> execute((match e with TupleAns(n, l) -> (List.nth l (intof i)))::s', t, c')
 ;;
