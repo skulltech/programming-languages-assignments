@@ -34,11 +34,7 @@ let rec map f l = match l with
 
 let intof e = match e with IntAns i -> i ;;
 let boolof b = match b with BoolAns b -> b ;;
-let rec listof l = match b with
-                    | [] -> []
-                    | (IntAns x)::xs -> x::(listof xs)
-;;
-
+let intexp a b = int_of_float ((float_of_int a) ** (float_of_int b)) ;;
 
 let rec eval rho exp = match exp with
                         | IntConst n  -> IntAns n
@@ -48,7 +44,7 @@ let rec eval rho exp = match exp with
                         | Sub (e1, e2) -> IntAns ((intof (eval rho e1)) - (intof (eval rho e2)))
                         | Mul (e1, e2) -> IntAns ((intof (eval rho e1)) * (intof (eval rho e2)))
                         | Div (e1, e2) -> IntAns ((intof (eval rho e1)) / (intof (eval rho e2)))
-                        | Exp (e1, e2) -> IntAns (int_of_float ((float_of_int (intof (eval rho e1))) ** float_of_int (intof (eval rho e2))))
+                        | Exp (e1, e2) -> IntAns (intexp (intof (eval rho e1)) (intof (eval rho e2)))
                         | BoolConst b -> BoolAns b
                         | Not b -> BoolAns (not (boolof (eval rho b)))
                         | And (e1, e2) -> BoolAns ((boolof (eval rho e1)) && (boolof (eval rho e2)))
@@ -94,4 +90,26 @@ let rec compile exp = match exp with
                         | LsEql (e1, e2) -> (compile e1) @ (compile e2) @ [LSEQL]
                         | Tuple (n, l) -> (join (map compile l) SEP) @ [INTCONST n] @ [TUPLE]
                         | Proj (i, t) -> (compile t) @ [(INTCONST i); PROJ]
+;;
+ 
+let rec execute (s, t, c) = match (s, c) with
+                        | (s, []) -> List.hd s
+                        | (s, (INTCONST n)::c') -> execute((IntAns n)::s, t, c')
+                        | (n::s', ABS::c') -> execute((IntAns (abs (intof n)))::s', t, c')
+                        | (n1::n2::s', ADD::c') -> execute((IntAns ((intof n1) + (intof n2)))::s', t, c')
+                        | (n1::n2::s', SUB::c') -> execute((IntAns ((intof n1) - (intof n2)))::s', t, c')
+                        | (n1::n2::s', MUL::c') -> execute((IntAns ((intof n1) * (intof n2)))::s', t, c')
+                        | (n1::n2::s', DIV::c') -> execute((IntAns ((intof n1) / (intof n2)))::s', t, c')
+                        | (n1::n2::s', EXP::c') -> execute((IntAns (intexp (intof n1) (intof n2)))::s', t, c')
+                        | (s, (BOOLCONST b)::c') -> execute((BoolAns b)::s, t, c')
+                        | (b::s', NOT::c') -> execute((BoolAns (not (boolof b)))::s', t, c')
+                        | (b1::b2::s', AND::c') -> execute((BoolAns ((boolof b1) && (boolof b2)))::s', t, c')
+                        | (b1::b2::s', OR::c') -> execute((BoolAns ((boolof b1) || (boolof b2)))::s', t, c')
+                        | (b1::b2::s', IMPLIES::c') -> execute((BoolAns ((not (boolof b1)) || (boolof b2)))::s', t, c')
+                        | (n1::n2::s', GRT::c') -> execute((BoolAns ((intof n1) > (intof n2)))::s', t, c')
+                        | (n1::n2::s', LS::c') -> execute((BoolAns ((intof n1) < (intof n2)))::s', t, c')
+                        | (n1::n2::s', GRTEQL::c') -> execute((BoolAns ((intof n1) >= (intof n2)))::s', t, c')
+                        | (n1::n2::s', LSEQL::c') -> execute((BoolAns ((intof n1) <= (intof n2)))::s', t, c')
+                        | (e1::e2::s', EQL::c') -> execute((BoolAns (e1 = e2))::s', t, c')
+                        | (s, (LOOKUP s1)::c') -> execute((t s1)::s, t, c')
 ;;
