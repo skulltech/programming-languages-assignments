@@ -23,15 +23,8 @@ type exp =
 ;;
 *)
 
-type exp = 
-          IntExp of intexp
-        | BoolExp of boolexp 
-        | Tuple of int * exp list
-        | Identifier of string
-        | Proj of int * exp
-        | Eql of exp * exp
-;;
 
+(* 
 type intexp = 
            IntConst of int
          | Abs of intexp
@@ -54,15 +47,37 @@ type boolexp =
          | Implies of boolexp * boolexp
 ;;
 
+type exp = 
+          IntExp of intexp
+        | BoolExp of boolexp 
+        | TupleExp of int * exp list
+        | Identifier of string
+        | Proj of int * exp
+        | Eql of exp * exp
+;;
+
 type answer = 
-          IntConst of int
-        | BoolConst of bool
-        | Tuple of int * answer list
+          IntAns of int
+        | BoolAns of bool
+        | TupleAns of int * answer list
+;;
+
+let rec map f l = match l with
+                      [] -> []
+                    | x::xs -> (f x)::(map f xs)
 ;;
 
 let rec eval rho exp = match exp with
-                          IntConst n  -> n
-                        | Abs e -> abs (eval rho e)
+                          IntExp ie -> inteval rho exp
+                        | BoolExp be -> booleval rho exp
+                        | TupleExp (n, l) -> TupleAns (n, map (eval rho) l)
+                        | Identifier s -> eval rho (rho s)
+                        | Proj (i, l) -> eval rho (List.nth l i)
+;;
+
+let rec inteval rho intexp = match intexp with
+                          IntConst n  -> IntAns n
+                        | Abs e -> abs (inteval rho e)
                         | Identifier s -> eval rho (rho s)
                         | Add (e1, e2) -> (eval rho e1) + (eval rho e2)
                         | Sub (e1, e2) -> (eval rho e1) + (eval rho e2)
@@ -82,3 +97,6 @@ let rec eval rho exp = match exp with
                         | Tup (n, l) -> l
                         | Proj (n, e) -> List.nth l n
 ;;
+*)
+
+
