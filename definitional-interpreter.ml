@@ -23,7 +23,6 @@ type exp =
 ;;
 *)
 
-
 (* 
 type intexp = 
            IntConst of int
@@ -100,3 +99,34 @@ let rec inteval rho intexp = match intexp with
 *)
 
 
+type intexp = 
+              IntConst of int
+            | Plus of intexp * intexp
+;;
+
+type boolexp = 
+              BoolConst of bool
+            | And of boolexp * boolexp
+;;
+
+type exp = 
+              IntExp of intexp
+            | BoolExp of boolexp
+;;
+
+type answer = IntAns of int | BoolAns of bool ;;
+
+let rec inteval e = match e with
+                        | IntConst n -> IntAns n
+                        | Plus (e1, e2) -> IntAns ((match (inteval e1) with IntAns a1 -> a1) + (match (inteval e2) with IntAns a2 -> a2))
+;;
+
+let rec booleval e = match e with
+                        | BoolConst b -> BoolAns b
+                        | And (e1, e2) -> BoolAns((match (booleval e1) with BoolAns b1 -> b1) && (match (booleval e2) with BoolAns b2 -> b2))
+;;
+
+let rec eval e = match e with
+                        | IntExp e -> inteval e
+                        | BoolExp b -> booleval b
+;;
