@@ -121,3 +121,15 @@ let rec execute (s, t, c) = match (s, c) with
                         | ((IntAns n)::s, TUPLE::c') -> execute((match (split n s) with (a, b) -> TupleAns(n, (List.rev a))::b), t, c')
                         | (i::e::s', PROJ::c') -> execute((match e with TupleAns(n, l) -> (List.nth l (intof i)))::s', t, c')
 ;;
+
+
+(* some test cases *)
+
+let rho x = match x with
+               | "x" -> IntAns 5
+               | "y" -> IntAns 8
+;;
+
+let e1 = And(Proj(1, Tuple(2 , [Add(IntConst 5, IntConst 10); GrtEql((Abs (IntConst (-2))), Identifier "x")])), BoolConst false);;
+eval rho e1;;
+execute ([], rho, (compile e1));;
