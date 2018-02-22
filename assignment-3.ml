@@ -44,8 +44,19 @@ let v = Node (Symbol ("a", 3), [u; u; t]);;
 let w = Node (Symbol ("a", 3), [v; u; V(Var "x")]);;
 let x = Node (Symbol ("d", 4), [V(Var "y"); w; u; V(Var "x")]);;
 
+
 let rec subst s t = match t with
                     | V var -> if Hashtbl.mem s var then Hashtbl.find s var else V var
                     | Node (sm, []) -> Node (sm, [])
                     | Node (sm, l) -> Node (sm, (List.map (subst s) l))
 ;;
+
+
+let compose s1 s2 = let composed = Hashtbl.create (Hashtbl.length s1) in
+                    Hashtbl.iter (fun k d -> Hashtbl.add composed k (subst s2 d)) s1;
+                    composed
+;;
+
+let htbl = Hashtbl.create 1;;
+Hashtbl.add htbl (Var "x") v;;
+subst htbl w;;
