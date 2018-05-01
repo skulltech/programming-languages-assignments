@@ -1,10 +1,5 @@
-% Helper predicates.
-append([], L2, L2).
-append([X|Xs], L2, [X|L3]) :- append(Xs, L2, L3).
-
-member(X, []) :- fail.
-member(X, [X|Ls]).
-member(X, [Y|Ls]) :- member(X, Ls).
+% Include helper predicates.
+:- [helpers].
 
 % Numerical and boolean constants.
 hasType(G, E, intT) :- integer(E).
